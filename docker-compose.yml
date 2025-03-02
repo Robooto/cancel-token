@@ -1,0 +1,28 @@
+version: '3.9'
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      SA_PASSWORD: "Your_password123"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+      
+  manager-api:
+    build:
+      context: .
+      dockerfile: manager-api/Dockerfile
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+  resource-access:
+    build:
+      context: .
+      dockerfile: resource-access/Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://+:5001
+      - ConnectionStrings__DefaultConnection=Server=mssql,1433;Database=YourDatabase;User Id=sa;Password=Your_password123;TrustServerCertificate=True;
+    ports:
+      - "5001:5001"
+    depends_on:
+      - mssql
