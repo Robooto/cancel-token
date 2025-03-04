@@ -39,9 +39,9 @@ app.MapGet("/process", async (CancellationToken ct, ILogger<Program> logger) =>
 // Endpoint without CancellationToken support
 app.MapGet("/processWithout", async (ILogger<Program> logger) =>
     {
-        logger.LogInformation("Starting task delay without CancellationToken.");
-        await Task.Delay(10000);
-        logger.LogInformation("Task delay completed successfully.");
+        logger.LogInformation("Starting task delay without CancellationToken. ${DateTime.Now}", DateTime.Now);
+        await Task.Delay(5000);
+        logger.LogInformation("Task delay completed successfully. ${DateTime.Now}", DateTime.Now);
         return Results.Ok("Completed without CancellationToken");
     })
     .WithName("ProcessWithoutCancellation")
@@ -87,7 +87,7 @@ app.MapGet("/grpc-sql-op-with-token", async (CancellationToken ct, ILogger<Progr
         }
         catch (RpcException)
         {
-            logger.LogWarning("SQL operation was canceled.");
+            logger.LogWarning("SQL operation was canceled. ${DateTime.Now}", DateTime.Now);
             return Results.Problem("SQL operation was canceled.");
         }
     })
@@ -99,7 +99,7 @@ app.MapGet("/grpc-sql-op-no-token", async (ILogger<Program> logger) =>
         using var channel = GrpcChannel.ForAddress("http://resource-access:5001");
         var client = new Greeter.GreeterClient(channel);
         var response = await client.SimulateSqlOperationWithoutCancellationAsync(new SqlRequest { Query = "Execute SQL" });
-        logger.LogInformation("SQL operation completed successfully without cancellation support.");
+        logger.LogInformation("SQL operation completed successfully without cancellation support. ${DateTime.Now}", DateTime.Now);
         return Results.Ok(response.Message);
     })
     .WithName("GrpcSqlOperationWithoutToken")
